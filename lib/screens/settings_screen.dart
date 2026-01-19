@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import '../services/settings_service.dart';
 import '../theme/app_theme.dart';
 
@@ -12,6 +13,9 @@ class SettingsScreen extends StatefulWidget {
 
 class _SettingsScreenState extends State<SettingsScreen> {
   String selectedCurrency = SettingsService.getCurrencyCode();
+  String appName = '';
+  String appVersion = '';
+  String packageName = '';
 
   final Map<String, Map<String, String>> currencies = {
     'USD': {'name': 'US Dollar', 'symbol': '\$'},
@@ -34,6 +38,21 @@ class _SettingsScreenState extends State<SettingsScreen> {
     'AED': {'name': 'UAE Dirham', 'symbol': 'د.إ'},
     'SAR': {'name': 'Saudi Riyal', 'symbol': '﷼'},
   };
+
+  @override
+  void initState() {
+    super.initState();
+    _loadPackageInfo();
+  }
+
+  Future<void> _loadPackageInfo() async {
+    final packageInfo = await PackageInfo.fromPlatform();
+    setState(() {
+      appName = packageInfo.appName;
+      appVersion = '${packageInfo.version} (${packageInfo.buildNumber})';
+      packageName = packageInfo.packageName;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -60,7 +79,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               elevation: 0,
               backgroundColor: Color(0xFF1976D2),
               leading: IconButton(
-                icon: Icon(Icons.arrow_back_rounded, color: Colors.white),
+                icon: Icon(Icons.chevron_left, color: Colors.white, size: 28),
                 onPressed: () => Navigator.pop(context),
               ),
               title: Row(
@@ -245,11 +264,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     _buildCard(
                       child: Column(
                         children: [
-                          _buildInfoRow('App Name', 'MilkPlease'),
+                          _buildInfoRow('App Name', appName.isNotEmpty ? appName : 'MilkPlease'),
                           Divider(height: 24),
-                          _buildInfoRow('Version', '1.0.0'),
+                          _buildInfoRow('Version', appVersion.isNotEmpty ? appVersion : '1.0.0'),
                           Divider(height: 24),
-                          _buildInfoRow('Developer', 'MilkPlease Team'),
                         ],
                       ),
                     ),

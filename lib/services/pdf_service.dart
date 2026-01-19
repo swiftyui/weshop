@@ -2,6 +2,7 @@ import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:flutter/material.dart';
 import '../models/grocery_item.dart';
 import 'settings_service.dart';
 import 'dart:io';
@@ -184,6 +185,7 @@ class PdfService {
       await Share.shareXFiles(
         [XFile(file.path)],
         text: 'Check out my grocery list from MilkPlease!',
+        sharePositionOrigin: Rect.fromLTWH(0, 0, 10, 10),
       );
     } catch (e) {
       rethrow;

@@ -123,7 +123,7 @@ class _AddEditItemDialogState extends State<AddEditItemDialog> {
               elevation: 0,
               backgroundColor: Color(0xFF1976D2),
               leading: IconButton(
-                icon: Icon(Icons.close_rounded, color: Colors.white, size: 24),
+                icon: Icon(Icons.chevron_left, color: Colors.white, size: 28),
                 onPressed: () => Navigator.pop(context),
               ),
               title: Row(
