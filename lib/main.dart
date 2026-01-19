@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'services/storage_service.dart';
+import 'services/settings_service.dart';
 import 'theme/app_theme.dart';
 import 'screens/home_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await StorageService.init();
+  await SettingsService.init();
   runApp(const MilkPleaseApp());
 }
 

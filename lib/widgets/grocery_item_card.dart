@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../models/grocery_item.dart';
+import '../services/settings_service.dart';
 import '../theme/app_theme.dart';
 
 class GroceryItemCard extends StatelessWidget {
@@ -9,7 +10,7 @@ class GroceryItemCard extends StatelessWidget {
   final VoidCallback onEdit;
   final VoidCallback onDelete;
 
-  const GroceryItemCard({
+  const GroceryItemCard({super.key, 
     required this.item,
     required this.onToggle,
     required this.onEdit,
@@ -34,9 +35,14 @@ class GroceryItemCard extends StatelessWidget {
               Container(
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: item.isChecked
-                      ? AppTheme.primaryColor
-                      : Colors.grey.shade200,
+                  gradient: item.isChecked
+                      ? LinearGradient(
+                          colors: [AppTheme.primaryColor, AppTheme.secondaryColor],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        )
+                      : null,
+                  color: item.isChecked ? null : Colors.grey.shade200,
                 ),
                 child: Icon(
                   item.isChecked ? Icons.check : Icons.circle_outlined,
@@ -93,7 +99,7 @@ class GroceryItemCard extends StatelessWidget {
                         if (item.estimatedPrice != null) ...[
                           SizedBox(width: 8),
                           Text(
-                            '\$${item.estimatedPrice!.toStringAsFixed(2)}',
+                            '${SettingsService.getCurrencySymbol()}${item.estimatedPrice!.toStringAsFixed(2)}',
                             style: GoogleFonts.poppins(
                               fontSize: 12,
                               fontWeight: FontWeight.w600,
@@ -111,6 +117,7 @@ class GroceryItemCard extends StatelessWidget {
               PopupMenuButton(
                 itemBuilder: (context) => [
                   PopupMenuItem(
+                    onTap: onEdit,
                     child: Row(
                       children: [
                         Icon(Icons.edit,
@@ -119,9 +126,9 @@ class GroceryItemCard extends StatelessWidget {
                         Text('Edit'),
                       ],
                     ),
-                    onTap: onEdit,
                   ),
                   PopupMenuItem(
+                    onTap: onDelete,
                     child: Row(
                       children: [
                         Icon(Icons.delete,
@@ -131,7 +138,6 @@ class GroceryItemCard extends StatelessWidget {
                             style: TextStyle(color: AppTheme.errorColor)),
                       ],
                     ),
-                    onTap: onDelete,
                   ),
                 ],
                 icon: Icon(Icons.more_vert, color: Colors.grey.shade600),

@@ -6,7 +6,7 @@ class EmptyState extends StatelessWidget {
   final String subtitle;
   final IconData icon;
 
-  const EmptyState({
+  const EmptyState({super.key, 
     required this.title,
     required this.subtitle,
     this.icon = Icons.shopping_basket_outlined,

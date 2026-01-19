@@ -2,25 +2,38 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class AppTheme {
-  // Colors inspired by modern apps
+  // Blue gradient theme colors
   static const Color primaryColor = Color(0xFF2196F3); // Blue
-  static const Color secondaryColor = Color(0xFF1DE9B6); // Teal
-  static const Color accentColor = Color(0xFFFF6B6B); // Red
-  static const Color backgroundColor = Color(0xFFFAFAFA); // Light gray
+  static const Color secondaryColor = Color(0xFF64B5F6); // Light Blue
+  static const Color accentColor = Color(0xFF1976D2); // Dark Blue
+  static const Color backgroundColor = Color(0xFFF5F9FF); // Light blue tint
   static const Color surfaceColor = Color(0xFFFFFFFF); // White
   static const Color errorColor = Color(0xFFE53935); // Error red
+  
+  // Gradient presets
+  static const LinearGradient primaryGradient = LinearGradient(
+    colors: [Color(0xFF2196F3), Color(0xFF64B5F6)],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
+  
+  static const LinearGradient subtleGradient = LinearGradient(
+    colors: [Color(0xFF64B5F6), Color(0xFF90CAF9)],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
 
-  // Category colors
+  // Category colors - blue gradient theme
   static final Map<String, Color> categoryColors = {
-    'Vegetables': Color(0xFF4CAF50),
-    'Fruits': Color(0xFFFF9800),
-    'Dairy': Color(0xFFF3E5F5),
-    'Meat': Color(0xFFE91E63),
-    'Pantry': Color(0xFFFFEB3B),
-    'Frozen': Color(0xFF00BCD4),
-    'Beverages': Color(0xFF673AB7),
-    'Snacks': Color(0xFF8D6E63),
-    'Other': Color(0xFF9E9E9E),
+    'Vegetables': Color(0xFF42A5F5), // Light blue
+    'Fruits': Color(0xFF5C6BC0), // Indigo blue
+    'Dairy': Color(0xFF90CAF9), // Very light blue
+    'Meat': Color(0xFF1E88E5), // Medium blue
+    'Pantry': Color(0xFF64B5F6), // Sky blue
+    'Frozen': Color(0xFF29B6F6), // Cyan blue
+    'Beverages': Color(0xFF1976D2), // Dark blue
+    'Snacks': Color(0xFF7986CB), // Soft blue
+    'Other': Color(0xFFBBDEFB), // Pale blue
   };
 
   static ThemeData get lightTheme {

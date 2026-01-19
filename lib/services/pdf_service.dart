@@ -3,6 +3,7 @@ import 'package:pdf/widgets.dart' as pw;
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 import '../models/grocery_item.dart';
+import 'settings_service.dart';
 import 'dart:io';
 import 'package:intl/intl.dart';
 
@@ -78,7 +79,7 @@ class PdfService {
                         style: pw.TextStyle(fontSize: 11)),
                     if (totalPrice > 0)
                       pw.Text(
-                          'Estimated Total: \$${totalPrice.toStringAsFixed(2)}',
+                          'Estimated Total: ${SettingsService.getCurrencySymbol()}${totalPrice.toStringAsFixed(2)}',
                           style: pw.TextStyle(
                               fontSize: 11, fontWeight: pw.FontWeight.bold)),
                   ],
@@ -108,26 +109,58 @@ class PdfService {
                                 mainAxisAlignment:
                                     pw.MainAxisAlignment.spaceBetween,
                                 children: [
+                                  pw.Container(
+                                    width: 12,
+                                    height: 12,
+                                    margin: pw.EdgeInsets.only(right: 8),
+                                    decoration: pw.BoxDecoration(
+                                      border: pw.Border.all(
+                                        color: item.isChecked ? PdfColors.blue : PdfColors.grey600,
+                                        width: 2,
+                                      ),
+                                      borderRadius: pw.BorderRadius.circular(2),
+                                      color: item.isChecked ? PdfColors.blue : null,
+                                    ),
+                                    child: item.isChecked
+                                        ? pw.Center(
+                                            child: pw.Container(
+                                              width: 6,
+                                              height: 6,
+                                              decoration: pw.BoxDecoration(
+                                                color: PdfColors.white,
+                                                borderRadius: pw.BorderRadius.circular(1),
+                                              ),
+                                            ),
+                                          )
+                                        : null,
+                                  ),
                                   pw.Expanded(
                                     child: pw.Text(
-                                      '${item.isChecked ? '✓ ' : '○ '}${item.name}',
+                                      item.name,
                                       style: pw.TextStyle(
                                         fontSize: 11,
                                         decoration: item.isChecked
                                             ? pw.TextDecoration.lineThrough
                                             : null,
+                                        color: item.isChecked ? PdfColors.grey600 : PdfColors.black,
                                       ),
                                     ),
                                   ),
                                   pw.Text(
                                     '${item.quantity} ${item.unit}',
                                     style: pw.TextStyle(
-                                        fontSize: 10, color: PdfColors.grey),
+                                        fontSize: 10, color: PdfColors.grey700),
                                   ),
                                   if (item.estimatedPrice != null)
-                                    pw.Text(
-                                      '\$${item.estimatedPrice!.toStringAsFixed(2)}',
-                                      style: pw.TextStyle(fontSize: 10),
+                                    pw.Padding(
+                                      padding: pw.EdgeInsets.only(left: 12),
+                                      child: pw.Text(
+                                        '${SettingsService.getCurrencySymbol()}${item.estimatedPrice!.toStringAsFixed(2)}',
+                                        style: pw.TextStyle(
+                                          fontSize: 10,
+                                          fontWeight: pw.FontWeight.bold,
+                                        ),
+                                      ),
                                     ),
                                 ],
                               ),
@@ -136,7 +169,7 @@ class PdfService {
                   ),
                   pw.SizedBox(height: 12),
                 ];
-              }).toList(),
+              }),
             ],
           ),
         ],

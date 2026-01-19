@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:uuid/uuid.dart';
 import '../models/grocery_item.dart';
+import '../services/settings_service.dart';
+import '../theme/app_theme.dart';
 
 class AddEditItemDialog extends StatefulWidget {
   final GroceryItem? item;
   final Function(GroceryItem) onSave;
 
-  const AddEditItemDialog({
+  const AddEditItemDialog({super.key, 
     this.item,
     required this.onSave,
   });
@@ -17,6 +19,7 @@ class AddEditItemDialog extends StatefulWidget {
 }
 
 class _AddEditItemDialogState extends State<AddEditItemDialog> {
+  final _formKey = GlobalKey<FormState>();
   late TextEditingController nameController;
   late TextEditingController quantityController;
   late TextEditingController priceController;
@@ -74,10 +77,7 @@ class _AddEditItemDialogState extends State<AddEditItemDialog> {
   }
 
   void _saveItem() {
-    if (nameController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Please enter item name')),
-      );
+    if (!_formKey.currentState!.validate()) {
       return;
     }
 
@@ -99,141 +99,396 @@ class _AddEditItemDialogState extends State<AddEditItemDialog> {
 
   @override
   Widget build(BuildContext context) {
-    return Dialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-      child: SingleChildScrollView(
-        child: Padding(
-          padding: EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                widget.item == null ? 'Add Item' : 'Edit Item',
-                style: GoogleFonts.poppins(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w700,
-                  color: Colors.black87,
-                ),
-              ),
-              SizedBox(height: 24),
-
-              // Item Name
-              TextField(
-                controller: nameController,
-                decoration: InputDecoration(
-                  labelText: 'Item Name',
-                  hintText: 'e.g., Milk, Bread, Apples',
-                  prefixIcon: Icon(Icons.shopping_bag_outlined),
-                ),
-              ),
-              SizedBox(height: 16),
-
-              // Category
-              DropdownButtonFormField<String>(
-                value: selectedCategory,
-                decoration: InputDecoration(
-                  labelText: 'Category',
-                  prefixIcon: Icon(Icons.category_outlined),
-                ),
-                items: categories.map((category) {
-                  return DropdownMenuItem(
-                    value: category,
-                    child: Text(category),
-                  );
-                }).toList(),
-                onChanged: (value) {
-                  setState(() => selectedCategory = value ?? 'Other');
-                },
-              ),
-              SizedBox(height: 16),
-
-              // Quantity and Unit
-              Row(
-                children: [
-                  Expanded(
-                    flex: 1,
-                    child: TextField(
-                      controller: quantityController,
-                      keyboardType: TextInputType.number,
-                      decoration: InputDecoration(
-                        labelText: 'Qty',
-                        prefixIcon:
-                            Icon(Icons.production_quantity_limits_outlined),
-                      ),
-                    ),
-                  ),
-                  SizedBox(width: 12),
-                  Expanded(
-                    flex: 1,
-                    child: DropdownButtonFormField<String>(
-                      value: selectedUnit,
-                      decoration: InputDecoration(
-                        labelText: 'Unit',
-                      ),
-                      items: units.map((unit) {
-                        return DropdownMenuItem(
-                          value: unit,
-                          child: Text(unit),
-                        );
-                      }).toList(),
-                      onChanged: (value) {
-                        setState(() => selectedUnit = value ?? 'pcs');
-                      },
-                    ),
-                  ),
-                ],
-              ),
-              SizedBox(height: 16),
-
-              // Price
-              TextField(
-                controller: priceController,
-                keyboardType: TextInputType.numberWithOptions(decimal: true),
-                decoration: InputDecoration(
-                  labelText: 'Estimated Price (Optional)',
-                  hintText: '\$0.00',
-                  prefixIcon: Icon(Icons.attach_money),
-                ),
-              ),
-              SizedBox(height: 16),
-
-              // Notes
-              TextField(
-                controller: notesController,
-                maxLines: 3,
-                decoration: InputDecoration(
-                  labelText: 'Notes (Optional)',
-                  hintText: 'Add any notes...',
-                  prefixIcon: Icon(Icons.notes_outlined),
-                  alignLabelWithHint: true,
-                ),
-              ),
-              SizedBox(height: 24),
-
-              // Buttons
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton(
-                      onPressed: () => Navigator.pop(context),
-                      child: Text('Cancel'),
-                    ),
-                  ),
-                  SizedBox(width: 12),
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: _saveItem,
-                      child: Text(
-                          widget.item == null ? 'Add Item' : 'Save Changes'),
-                    ),
-                  ),
-                ],
-              ),
+    return Scaffold(
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              AppTheme.primaryColor.withOpacity(0.03),
+              AppTheme.secondaryColor.withOpacity(0.03),
+              Colors.white,
             ],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            stops: [0.0, 0.3, 1.0],
+          ),
+        ),
+        child: CustomScrollView(
+          slivers: [
+            // AppBar with darker gradient
+            SliverAppBar(
+              expandedHeight: 0,
+              floating: false,
+              pinned: true,
+              elevation: 0,
+              backgroundColor: Color(0xFF1976D2),
+              leading: IconButton(
+                icon: Icon(Icons.close_rounded, color: Colors.white, size: 24),
+                onPressed: () => Navigator.pop(context),
+              ),
+              title: Row(
+                children: [
+                  Container(
+                    padding: EdgeInsets.all(6),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.2),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      widget.item == null 
+                        ? Icons.add_shopping_cart_rounded 
+                        : Icons.edit_rounded,
+                      color: Colors.white,
+                      size: 18,
+                    ),
+                  ),
+                  SizedBox(width: 12),
+                  Text(
+                    widget.item == null ? 'Add Item' : 'Edit Item',
+                    style: GoogleFonts.poppins(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white,
+                      letterSpacing: 0.3,
+                    ),
+                  ),
+                ],
+              ),
+              flexibleSpace: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      Color(0xFF1976D2),
+                      Color(0xFF2196F3),
+                    ],
+                    begin: Alignment.centerLeft,
+                    end: Alignment.centerRight,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Color(0xFF1976D2).withOpacity(0.3),
+                      blurRadius: 8,
+                      offset: Offset(0, 2),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
+            // Form Content
+            SliverToBoxAdapter(
+              child: Form(
+                key: _formKey,
+                child: Padding(
+                  padding: EdgeInsets.all(20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Section: Basic Information
+                      _buildSectionTitle('Basic Information', Icons.info_outline),
+                      SizedBox(height: 16),
+                      
+                      _buildCard(
+                        child: Column(
+                          children: [
+                            TextFormField(
+                              controller: nameController,
+                              autofocus: widget.item == null,
+                              textCapitalization: TextCapitalization.words,
+                              style: GoogleFonts.poppins(fontSize: 16),
+                              decoration: InputDecoration(
+                                labelText: 'Item Name *',
+                                hintText: 'e.g., Whole Milk, Fresh Bread',
+                                prefixIcon: Icon(Icons.shopping_bag_rounded, color: AppTheme.primaryColor),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide.none,
+                                ),
+                                filled: true,
+                                fillColor: AppTheme.backgroundColor,
+                              ),
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Please enter an item name';
+                                }
+                                return null;
+                              },
+                            ),
+                            SizedBox(height: 16),
+                            DropdownButtonFormField<String>(
+                              value: selectedCategory,
+                              style: GoogleFonts.poppins(fontSize: 16, color: Colors.black87),
+                              decoration: InputDecoration(
+                                labelText: 'Category',
+                                prefixIcon: Icon(Icons.category_rounded, color: AppTheme.primaryColor),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide.none,
+                                ),
+                                filled: true,
+                                fillColor: AppTheme.backgroundColor,
+                              ),
+                              items: categories.map((category) {
+                                return DropdownMenuItem(
+                                  value: category,
+                                  child: Row(
+                                    children: [
+                                      Container(
+                                        width: 12,
+                                        height: 12,
+                                        decoration: BoxDecoration(
+                                          color: AppTheme.categoryColors[category],
+                                          shape: BoxShape.circle,
+                                        ),
+                                      ),
+                                      SizedBox(width: 12),
+                                      Text(category),
+                                    ],
+                                  ),
+                                );
+                              }).toList(),
+                              onChanged: (value) {
+                                setState(() => selectedCategory = value ?? 'Other');
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      SizedBox(height: 28),
+
+                      // Section: Quantity & Pricing
+                      _buildSectionTitle('Quantity & Pricing', Icons.shopping_cart_outlined),
+                      SizedBox(height: 16),
+
+                      _buildCard(
+                        child: Column(
+                          children: [
+                            Row(
+                              children: [
+                                Expanded(
+                                  flex: 2,
+                                  child: TextFormField(
+                                    controller: quantityController,
+                                    keyboardType: TextInputType.number,
+                                    style: GoogleFonts.poppins(fontSize: 16),
+                                    decoration: InputDecoration(
+                                      labelText: 'Quantity *',
+                                      prefixIcon: Icon(Icons.inventory_2_rounded, color: AppTheme.primaryColor),
+                                      border: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                        borderSide: BorderSide.none,
+                                      ),
+                                      filled: true,
+                                      fillColor: AppTheme.backgroundColor,
+                                    ),
+                                    validator: (value) {
+                                      if (value == null || value.isEmpty) {
+                                        return 'Required';
+                                      }
+                                      if (int.tryParse(value) == null) {
+                                        return 'Invalid';
+                                      }
+                                      return null;
+                                    },
+                                  ),
+                                ),
+                                SizedBox(width: 12),
+                                Expanded(
+                                  flex: 2,
+                                  child: DropdownButtonFormField<String>(
+                                    value: selectedUnit,
+                                    style: GoogleFonts.poppins(fontSize: 16, color: Colors.black87),
+                                    decoration: InputDecoration(
+                                      labelText: 'Unit',
+                                      border: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                        borderSide: BorderSide.none,
+                                      ),
+                                      filled: true,
+                                      fillColor: AppTheme.backgroundColor,
+                                    ),
+                                    items: units.map((unit) {
+                                      return DropdownMenuItem(
+                                        value: unit,
+                                        child: Text(unit),
+                                      );
+                                    }).toList(),
+                                    onChanged: (value) {
+                                      setState(() => selectedUnit = value ?? 'pcs');
+                                    },
+                                  ),
+                                ),
+                              ],
+                            ),
+                            SizedBox(height: 16),
+                            TextFormField(
+                              controller: priceController,
+                              keyboardType: TextInputType.numberWithOptions(decimal: true),
+                              style: GoogleFonts.poppins(fontSize: 16),
+                              decoration: InputDecoration(
+                                labelText: 'Estimated Price',
+                                hintText: '${SettingsService.getCurrencySymbol()}0.00',
+                                helperText: 'Optional - helps track total cost',
+                                prefixIcon: Icon(Icons.attach_money_rounded, color: AppTheme.primaryColor),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide.none,
+                                ),
+                                filled: true,
+                                fillColor: AppTheme.backgroundColor,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      SizedBox(height: 28),
+
+                      // Section: Additional Notes
+                      _buildSectionTitle('Additional Notes', Icons.notes_rounded),
+                      SizedBox(height: 16),
+
+                      _buildCard(
+                        child: TextFormField(
+                          controller: notesController,
+                          maxLines: 4,
+                          style: GoogleFonts.poppins(fontSize: 15),
+                          decoration: InputDecoration(
+                            labelText: 'Notes',
+                            hintText: 'Add any special instructions or preferences...',
+                            helperText: 'Optional',
+                            prefixIcon: Padding(
+                              padding: EdgeInsets.only(bottom: 60),
+                              child: Icon(Icons.edit_note_rounded, color: AppTheme.primaryColor),
+                            ),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide.none,
+                            ),
+                            filled: true,
+                            fillColor: AppTheme.backgroundColor,
+                            alignLabelWithHint: true,
+                          ),
+                        ),
+                      ),
+
+                      SizedBox(height: 40),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+      bottomNavigationBar: Container(
+        padding: EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 10,
+              offset: Offset(0, -2),
+            ),
+          ],
+        ),
+        child: SafeArea(
+          child: Container(
+            height: 56,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Color(0xFF1976D2), Color(0xFF2196F3)],
+                begin: Alignment.centerLeft,
+                end: Alignment.centerRight,
+              ),
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: Color(0xFF1976D2).withOpacity(0.4),
+                  blurRadius: 12,
+                  offset: Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: _saveItem,
+                borderRadius: BorderRadius.circular(16),
+                child: Center(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        widget.item == null ? Icons.add_rounded : Icons.check_rounded,
+                        color: Colors.white,
+                        size: 24,
+                      ),
+                      SizedBox(width: 12),
+                      Text(
+                        widget.item == null ? 'Add to List' : 'Save Changes',
+                        style: GoogleFonts.poppins(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildSectionTitle(String title, IconData icon) {
+    return Row(
+      children: [
+        Container(
+          padding: EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [AppTheme.primaryColor.withOpacity(0.2), AppTheme.secondaryColor.withOpacity(0.2)],
+            ),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Icon(icon, size: 20, color: AppTheme.primaryColor),
+        ),
+        SizedBox(width: 12),
+        Text(
+          title,
+          style: GoogleFonts.poppins(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+            color: Colors.black87,
+            letterSpacing: 0.3,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildCard({required Widget child}) {
+    return Container(
+      padding: EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 10,
+            offset: Offset(0, 2),
+          ),
+        ],
+      ),
+      child: child,
     );
   }
 }
